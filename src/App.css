@@ -6,23 +6,30 @@ body{
   height: 100vh;
   margin: 0;
   background:linear-gradient(to bottom, pink,rgb(189, 135, 135)) ;
+  
+}
+h1{
+  text-align: center;
 }
 .container{
   display: flex;
   flex-direction: row;
   justify-content: center;
+  overflow: hidden;
 }
 .calculator__grid{
   display:grid;
   margin-top: 2rem;
   justify-content: center;
-  grid-template-columns: repeat(4,5rem);
-  grid-template-rows: minmax(5rem,auto) repeat(5,4rem);
+  grid-template-columns: repeat(4,4rem);
+  grid-template-rows: minmax(6rem,auto) repeat(5,4rem);
   gap:5px;
   width: fit-content;
   background-color: rgb(190, 113, 126);
+  box-shadow: 5px 5px 20px  rgb(95, 81, 81);
   border-radius: 10px;
   padding: 10px;
+  overflow: hidden;
 }
 
 .calculator__grid > button{

@@ -14,6 +14,13 @@ const reducer = (state,{type,payload} )=>{
   
   switch(type) {
     case actions.add_digit:
+      if(state.overwrite){
+        return {
+          ...state,
+          currentInput: payload.digit,
+          overwrite:false
+        }
+      }
       if(payload.digit === "0" && state.currentInput === "0"){
         return state
       }
@@ -54,9 +61,47 @@ const reducer = (state,{type,payload} )=>{
         operation: payload.operation,
         currentInput: null
       }
+
+    case actions.evaluate:
+      if(state.operation ==null ||
+        state.previousInput ==null ||
+        state.currentInput ==null){
+          return state
+        }
+
+        return{
+          ...state,
+          overwrite :true,
+          previousInput :null,
+          operation:null,
+          currentInput: evaluate(state)
+        }
     
+    case actions.delete_digit:
+      if(state.overwrite){
+        return{
+          ...state,
+          overwrite: false,
+          currentInput: null
+        }
+      }
+      if(state.currentInput == null){
+        return state
+      }
+      if(state.currentInput.length === 1){
+        return{
+          ...state,
+          currentInput:null
+        }
+      }
+
+      return {
+        ...state,
+        currentInput :state.currentInput.slice(0,-1)
+      }
+
     case actions.clear:
-        return {}
+      return {}
     default : return null
   }
 }
@@ -87,19 +132,35 @@ function evaluate({currentInput, previousInput, operation}) {
   
 }
 
+//integer formatter
+const INTEGER_FORMATTER = new Intl.NumberFormat("en-us",{
+  maximumFractionDigits:0
+})
+function formatInput(input){
+  if(input == null) return
+
+  const [integer, decimal] = input.split('.')
+  if(decimal ==null) return INTEGER_FORMATTER.format(integer)
+  return `${INTEGER_FORMATTER.format(integer)}.${decimal}`
+}
+
 function App() {  
   // reducer
   const [{currentInput, previousInput, operation}, dispatch] = useReducer(reducer,{})
   
   return (
+    <><h1>Calculator</h1>
     <div className='container'>
       <div className="calculator__grid container">
         <div className="output">
-          <div className="previous__input">{previousInput} {operation}</div>
-          <div className="current__input">{currentInput}</div>
+          <div className="previous__input">{formatInput(previousInput)} {operation}</div>
+          <div className="current__input">{formatInput(currentInput)}</div>
         </div>
         <button className="span2" onClick={() => dispatch({ type: actions.clear })}>AC</button>
-        <button><i class="ri-delete-back-2-line"></i></button>
+        
+        <button onClick={() => dispatch({ type: actions.delete_digit })}>
+          <i className="ri-delete-back-2-line"></i>
+        </button>
         
         <OperationBtn operation ="/" dispatch={dispatch}/>
         <DigitBtn digit ="7" dispatch={dispatch}/>
@@ -119,10 +180,11 @@ function App() {
         <OperationBtn operation ="-" dispatch={dispatch}/>            
         <DigitBtn digit ="." dispatch={dispatch}/>
         <DigitBtn digit ="0" dispatch={dispatch}/>            
-        <button className="span2">=</button>            
+        <button className="span2" onClick={() =>dispatch({ type: actions.evaluate})}>=</button>            
             
       </div>
     </div>
+    </>
   );
 }
 
